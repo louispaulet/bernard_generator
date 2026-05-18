@@ -46,8 +46,8 @@ export function getGravePosition(index: number): Vector2 {
   const offset = offsets[stackIndex % offsets.length]
 
   return {
-    x: CEMETERY.x + 30 + column * CEMETERY.cellWidth + offset.x,
-    y: CEMETERY.y + 32 + row * CEMETERY.cellHeight + offset.y,
+    x: CEMETERY.x + 24 + column * CEMETERY.cellWidth + offset.x,
+    y: CEMETERY.y + 28 + row * CEMETERY.cellHeight + offset.y,
   }
 }
 

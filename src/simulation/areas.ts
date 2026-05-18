@@ -8,14 +8,14 @@ export type RectArea = {
 }
 
 export const CEMETERY = {
-  x: 604,
-  y: 374,
-  width: 300,
-  height: 196,
-  cols: 8,
-  rows: 4,
-  cellWidth: 34,
-  cellHeight: 38,
+  x: 679,
+  y: 423,
+  width: 150,
+  height: 98,
+  cols: 4,
+  rows: 2,
+  cellWidth: 28,
+  cellHeight: 30,
 } as const
 
 export const CEMETERY_AREA: RectArea = {

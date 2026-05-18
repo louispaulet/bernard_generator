@@ -28,7 +28,7 @@ describe('createCarrots', () => {
       2,
       { width: 960, height: 640, padding: 48 },
       nextRandom([
-        0.75, 0.65,
+        0.75, 0.7,
         0.5, 0.5,
         0.78, 0.72,
         0.1, 0.1,
