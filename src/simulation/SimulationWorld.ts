@@ -1,6 +1,7 @@
 import { BernardAgent } from './BernardAgent'
 import { CarrotField } from './CarrotField'
 import { PopulationLedger } from './PopulationLedger'
+import { CEMETERY_AREA } from './areas'
 import { DEFAULT_SETTINGS, resolveDay } from './rules'
 import {
   createInitialBernards,
@@ -92,6 +93,6 @@ export class SimulationWorld {
   }
 
   private spawnCarrots(random = Math.random): void {
-    this.carrots.spawn(this.settings.totalCarrots, this.bounds, random)
+    this.carrots.spawn(this.settings.totalCarrots, this.bounds, random, [CEMETERY_AREA])
   }
 }

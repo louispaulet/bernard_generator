@@ -8,6 +8,7 @@ describe('ASSET_PATHS', () => {
       carrot: '/assets/carrot.svg',
       grave: '/assets/grave.svg',
       house: '/assets/house.svg',
+      tree: '/assets/tree.svg',
     })
   })
 })

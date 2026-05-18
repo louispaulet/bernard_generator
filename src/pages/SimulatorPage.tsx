@@ -25,6 +25,7 @@ export function SimulatorPage() {
   const [totalCarrots, setTotalCarrots] = useState(DEFAULT_SETTINGS.totalCarrots)
   const [speed, setSpeed] = useState<SimulationSpeed>(DEFAULT_SETTINGS.speed)
   const [stats, setStats] = useState<SimulationStats>(initialStats)
+  const [restartKey, setRestartKey] = useState(0)
 
   const settings = useMemo<SimulationSettings>(
     () => ({
@@ -36,6 +37,15 @@ export function SimulatorPage() {
     }),
     [carrotsToReproduce, carrotsToSurvive, speed, totalCarrots],
   )
+
+  const restartSimulation = () => {
+    if (!window.confirm('Restart the simulation? Current population history will be cleared.')) {
+      return
+    }
+
+    setStats(initialStats)
+    setRestartKey((key) => key + 1)
+  }
 
   return (
     <>
@@ -53,7 +63,7 @@ export function SimulatorPage() {
 
       <section className="grid flex-1 gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
         <div className="min-h-[420px] overflow-hidden rounded-md bg-white p-2 shadow-sm ring-1 ring-slate-950/10">
-          <BernardGame settings={settings} onStats={setStats} />
+          <BernardGame key={restartKey} settings={settings} onStats={setStats} />
         </div>
 
         <aside className="flex flex-col gap-4">
@@ -64,10 +74,11 @@ export function SimulatorPage() {
             setCarrotsToReproduce={setCarrotsToReproduce}
             setTotalCarrots={setTotalCarrots}
             setSpeed={setSpeed}
+            onRestart={restartSimulation}
           />
+          <StatsOverlay history={stats.bernardsPerDay} />
         </aside>
       </section>
-      <StatsOverlay history={stats.bernardsPerDay} />
     </>
   )
 }

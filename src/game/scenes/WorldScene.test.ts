@@ -24,7 +24,7 @@ describe('WorldScene', () => {
     scene.create()
     scene.update(0, 16)
 
-    expect(scene.load.svg).toHaveBeenCalledTimes(4)
+    expect(scene.load.svg).toHaveBeenCalledTimes(5)
     expect(scene.cameras.main.setBackgroundColor).toHaveBeenCalledWith('#cfe8c3')
     expect(onStats).toHaveBeenCalledWith(expect.objectContaining({
       day: 1,

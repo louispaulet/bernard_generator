@@ -7,6 +7,7 @@ type ControlsPanelProps = {
   setCarrotsToReproduce: (value: number) => void
   setTotalCarrots: (value: number) => void
   setSpeed: (speed: SimulationSpeed) => void
+  onRestart: () => void
 }
 
 export function ControlsPanel({
@@ -15,6 +16,7 @@ export function ControlsPanel({
   setCarrotsToReproduce,
   setTotalCarrots,
   setSpeed,
+  onRestart,
 }: ControlsPanelProps) {
   return (
     <section className="rounded-md bg-white p-4 shadow-sm ring-1 ring-slate-950/10">
@@ -45,6 +47,13 @@ export function ControlsPanel({
           onChange={setTotalCarrots}
         />
         <SpeedControl speed={settings.speed} setSpeed={setSpeed} />
+        <button
+          type="button"
+          onClick={onRestart}
+          className="w-full rounded-md border border-red-800 bg-red-700 px-4 py-3 text-sm font-black text-white transition hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+        >
+          Restart Simulation
+        </button>
       </div>
     </section>
   )

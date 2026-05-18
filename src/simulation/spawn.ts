@@ -1,4 +1,5 @@
 import type { Bernard, Carrot, Vector2, WorldBounds } from './types'
+import { pointInAnyRect, type RectArea } from './areas'
 
 export const HOUSE_POSITION: Vector2 = { x: 96, y: 320 }
 export const HOUSE_CAPACITY = 10
@@ -40,21 +41,52 @@ export function createCarrots(
   count: number,
   bounds: WorldBounds,
   random = Math.random,
+  excludedAreas: RectArea[] = [],
 ): Carrot[] {
   return Array.from({ length: count }, (_, index) => ({
     id: index + 1,
-    position: randomPosition(bounds, random),
+    position: randomPosition(bounds, random, excludedAreas),
   }))
 }
 
-export function randomPosition(bounds: WorldBounds, random = Math.random): Vector2 {
+export function randomPosition(
+  bounds: WorldBounds,
+  random = Math.random,
+  excludedAreas: RectArea[] = [],
+): Vector2 {
   const minX = bounds.padding
   const maxX = bounds.width - bounds.padding
   const minY = bounds.padding
   const maxY = bounds.height - bounds.padding
 
-  return {
-    x: minX + random() * (maxX - minX),
-    y: minY + random() * (maxY - minY),
+  for (let attempt = 0; attempt < 100; attempt += 1) {
+    const position = {
+      x: minX + random() * (maxX - minX),
+      y: minY + random() * (maxY - minY),
+    }
+
+    if (!pointInAnyRect(position, excludedAreas)) {
+      return position
+    }
   }
+
+  return firstOpenPosition(bounds, excludedAreas)
+}
+
+function firstOpenPosition(bounds: WorldBounds, excludedAreas: RectArea[]): Vector2 {
+  const minX = bounds.padding
+  const maxX = bounds.width - bounds.padding
+  const minY = bounds.padding
+  const maxY = bounds.height - bounds.padding
+
+  for (let y = minY; y <= maxY; y += 16) {
+    for (let x = minX; x <= maxX; x += 16) {
+      const position = { x, y }
+      if (!pointInAnyRect(position, excludedAreas)) {
+        return position
+      }
+    }
+  }
+
+  return { x: minX, y: minY }
 }

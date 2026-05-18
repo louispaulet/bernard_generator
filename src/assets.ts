@@ -5,4 +5,5 @@ export const ASSET_PATHS = {
   carrot: `${base}assets/carrot.svg`,
   house: `${base}assets/house.svg`,
   grave: `${base}assets/grave.svg`,
+  tree: `${base}assets/tree.svg`,
 }

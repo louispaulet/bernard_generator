@@ -9,6 +9,7 @@ describe('ControlsPanel', () => {
     const setCarrotsToReproduce = vi.fn()
     const setTotalCarrots = vi.fn()
     const setSpeed = vi.fn()
+    const onRestart = vi.fn()
 
     render(
       <ControlsPanel
@@ -17,6 +18,7 @@ describe('ControlsPanel', () => {
         setCarrotsToReproduce={setCarrotsToReproduce}
         setTotalCarrots={setTotalCarrots}
         setSpeed={setSpeed}
+        onRestart={onRestart}
       />,
     )
 
@@ -24,10 +26,12 @@ describe('ControlsPanel', () => {
     fireEvent.change(screen.getByLabelText('Reproduce'), { target: { value: '8' } })
     fireEvent.change(screen.getByLabelText('Total Carrots'), { target: { value: '80' } })
     fireEvent.click(screen.getByRole('button', { name: '3x' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Restart Simulation' }))
 
     expect(setCarrotsToSurvive).toHaveBeenCalledWith(4)
     expect(setCarrotsToReproduce).toHaveBeenCalledWith(8)
     expect(setTotalCarrots).toHaveBeenCalledWith(80)
     expect(setSpeed).toHaveBeenCalledWith(3)
+    expect(onRestart).toHaveBeenCalled()
   })
 })

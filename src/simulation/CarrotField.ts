@@ -1,14 +1,15 @@
 import { distanceBetween } from './geometry'
 import { createCarrots } from './spawn'
+import type { RectArea } from './areas'
 import type { Carrot, Vector2, WorldBounds } from './types'
 
 export class CarrotField {
   private carrots = new Map<number, Carrot>()
 
-  spawn(count: number, bounds: WorldBounds, random = Math.random): void {
+  spawn(count: number, bounds: WorldBounds, random = Math.random, excludedAreas: RectArea[] = []): void {
     this.carrots.clear()
 
-    for (const carrot of createCarrots(count, bounds, random)) {
+    for (const carrot of createCarrots(count, bounds, random, excludedAreas)) {
       this.carrots.set(carrot.id, carrot)
     }
   }

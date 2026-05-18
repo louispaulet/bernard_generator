@@ -7,6 +7,7 @@ import {
   getHousePosition,
   HOUSE_POSITION,
 } from './spawn'
+import { CEMETERY_AREA, pointInRect } from './areas'
 
 describe('createCarrots', () => {
   it('spawns carrots inside the padded map bounds', () => {
@@ -21,6 +22,24 @@ describe('createCarrots', () => {
       { id: 2, position: { x: 250, y: 150 } },
     ])
   })
+
+  it('keeps carrots out of excluded areas', () => {
+    const carrots = createCarrots(
+      2,
+      { width: 960, height: 640, padding: 48 },
+      nextRandom([
+        0.75, 0.65,
+        0.5, 0.5,
+        0.78, 0.72,
+        0.1, 0.1,
+      ]),
+      [CEMETERY_AREA],
+    )
+
+    expect(carrots.every((carrot) => !pointInRect(carrot.position, CEMETERY_AREA))).toBe(true)
+    expect(carrots[0].position).toEqual({ x: 480, y: 320 })
+    expect(carrots[1].position).toEqual({ x: 134.4, y: 102.4 })
+  })
 })
 
 describe('createInitialBernards', () => {
@@ -33,6 +52,12 @@ describe('createInitialBernards', () => {
     ])
   })
 })
+
+function nextRandom(values: number[]) {
+  let index = 0
+
+  return () => values[index++] ?? values.at(-1) ?? 0
+}
 
 describe('house placement', () => {
   it.each([

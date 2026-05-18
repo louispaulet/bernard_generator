@@ -1,7 +1,7 @@
 import type Phaser from 'phaser'
 import { getHousePosition } from '../simulation/spawn'
 import type { WorldSnapshot } from '../simulation/worldState'
-import { drawTerrain, getGravePosition } from './TerrainPainter'
+import { TREE_POSITIONS, drawTerrain, getGraveDepth, getGravePosition } from './TerrainPainter'
 
 type SpriteMap = Map<number, Phaser.GameObjects.Image>
 
@@ -10,11 +10,13 @@ export class WorldRenderer {
   private carrots: SpriteMap = new Map()
   private graves: Phaser.GameObjects.Image[] = []
   private houses: SpriteMap = new Map()
+  private trees: Phaser.GameObjects.Image[] = []
 
   constructor(private readonly scene: Phaser.Scene) {}
 
   drawWorld(width: number, height: number): void {
     drawTerrain(this.scene, width, height)
+    this.syncTrees()
   }
 
   render(snapshot: WorldSnapshot): void {
@@ -71,7 +73,20 @@ export class WorldRenderer {
     this.graves.forEach((grave, index) => {
       const position = getGravePosition(index)
       grave.setPosition(position.x, position.y)
+      grave.setDepth(getGraveDepth(index))
     })
+  }
+
+  private syncTrees(): void {
+    if (this.trees.length > 0) {
+      return
+    }
+
+    this.trees = TREE_POSITIONS.map((position, index) => (
+      this.scene.add.image(position.x, position.y, 'tree')
+        .setScale(index % 3 === 0 ? 0.72 : 0.62)
+        .setDepth(1)
+    ))
   }
 
   private createCarrot(id: number): Phaser.GameObjects.Image {

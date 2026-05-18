@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { WorldRenderer } from './WorldRenderer'
+import { CEMETERY } from '../simulation/areas'
 import type { WorldSnapshot } from '../simulation/worldState'
+import { getGravePosition } from './TerrainPainter'
 import type Phaser from 'phaser'
 
 type FakeScene = {
@@ -28,7 +30,19 @@ describe('WorldRenderer', () => {
     expect(imageKeys).toContain('bernard')
     expect(imageKeys).toContain('carrot')
     expect(imageKeys).toContain('grave')
+    expect(imageKeys).toContain('tree')
     expect(scene.add.images.some((image: FakeImage) => image.destroyed)).toBe(true)
+  })
+
+  it('stacks grave positions inside the cemetery after the grid is full', () => {
+    const first = getGravePosition(0)
+    const stacked = getGravePosition(CEMETERY.cols * CEMETERY.rows)
+
+    expect(stacked).not.toEqual(first)
+    expect(stacked.x).toBeGreaterThanOrEqual(CEMETERY.x)
+    expect(stacked.x).toBeLessThanOrEqual(CEMETERY.x + CEMETERY.width)
+    expect(stacked.y).toBeGreaterThanOrEqual(CEMETERY.y)
+    expect(stacked.y).toBeLessThanOrEqual(CEMETERY.y + CEMETERY.height)
   })
 })
 

@@ -29,6 +29,7 @@ export class WorldScene extends Phaser.Scene {
     this.load.svg('carrot', ASSET_PATHS.carrot, { width: 72, height: 72 })
     this.load.svg('house', ASSET_PATHS.house, { width: 128, height: 128 })
     this.load.svg('grave', ASSET_PATHS.grave, { width: 64, height: 64 })
+    this.load.svg('tree', ASSET_PATHS.tree, { width: 112, height: 128 })
   }
 
   create(): void {
