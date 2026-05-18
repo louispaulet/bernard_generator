@@ -5,6 +5,7 @@ export const DEFAULT_DAY_DURATION_MS = 30_000
 export const DEFAULT_SETTINGS: SimulationSettings = {
   carrotsToSurvive: 3,
   carrotsToReproduce: 6,
+  totalCarrots: 40,
   speed: 1,
   dayDurationMs: DEFAULT_DAY_DURATION_MS,
 }

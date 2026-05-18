@@ -22,10 +22,6 @@ export function createCarrots(
   }))
 }
 
-export function getDailyCarrotCount(livingBernards: number): number {
-  return Math.max(16, Math.ceil(livingBernards * 8))
-}
-
 export function randomPosition(bounds: WorldBounds, random = Math.random): Vector2 {
   const minX = bounds.padding
   const maxX = bounds.width - bounds.padding

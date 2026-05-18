@@ -4,10 +4,16 @@ import { DEFAULT_SETTINGS, resolveDay } from '../../simulation/rules'
 import {
   createCarrots,
   createInitialBernards,
-  getDailyCarrotCount,
   HOUSE_POSITION,
 } from '../../simulation/spawn'
-import type { Bernard, Carrot, SimulationSettings, SimulationStats, WorldBounds } from '../../simulation/types'
+import type {
+  Bernard,
+  Carrot,
+  PopulationDay,
+  SimulationSettings,
+  SimulationStats,
+  WorldBounds,
+} from '../../simulation/types'
 
 type BernardView = {
   data: Bernard
@@ -41,6 +47,7 @@ export class WorldScene extends Phaser.Scene {
   private dayElapsedMs = 0
   private nextBernardId = INITIAL_BERNARDS + 1
   private meadow?: Phaser.GameObjects.Graphics
+  private bernardsPerDay: PopulationDay[] = [{ day: 1, bernards: INITIAL_BERNARDS }]
 
   constructor(
     getSettings: () => SimulationSettings,
@@ -140,6 +147,7 @@ export class WorldScene extends Phaser.Scene {
 
     this.day += 1
     this.dayElapsedMs = 0
+    this.bernardsPerDay.push({ day: this.day, bernards: this.bernards.size })
     this.spawnCarrots()
   }
 
@@ -157,7 +165,7 @@ export class WorldScene extends Phaser.Scene {
       height: WORLD_SIZE.height,
       padding: WORLD_SIZE.padding,
     }
-    const count = getDailyCarrotCount(this.bernards.size)
+    const count = this.settings.totalCarrots
 
     for (const carrot of createCarrots(count, bounds)) {
       const sprite = this.add.image(carrot.position.x, carrot.position.y, 'carrot').setScale(0.42).setDepth(3)
@@ -257,6 +265,7 @@ export class WorldScene extends Phaser.Scene {
       carrotsRemaining: this.carrots.size,
       birthsToday: this.birthsToday,
       timeRemainingMs: Math.max(0, (this.settings.dayDurationMs - this.dayElapsedMs) / this.settings.speed),
+      bernardsPerDay: [...this.bernardsPerDay],
     })
   }
 }

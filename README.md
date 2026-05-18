@@ -29,6 +29,7 @@ make kill
 - A default day lasts 30 seconds at `1x`, 15 seconds at `2x`, and 10 seconds at `3x`.
 - Each Bernard seeks the nearest unclaimed carrot.
 - Eating a carrot increments that Bernard's daily carrot count.
+- Each day has a fixed carrot budget, defaulting to 40 total carrots.
 - At day end:
   - Bernards below the survival threshold die.
   - Bernards at or above the survival threshold live into the next day.

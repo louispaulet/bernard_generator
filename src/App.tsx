@@ -3,7 +3,12 @@ import type { ReactNode } from 'react'
 import { NavLink, Route, Routes } from 'react-router'
 import { BernardGame } from './game/BernardGame'
 import { DEFAULT_SETTINGS } from './simulation/rules'
-import type { SimulationSettings, SimulationSpeed, SimulationStats } from './simulation/types'
+import type {
+  PopulationDay,
+  SimulationSettings,
+  SimulationSpeed,
+  SimulationStats,
+} from './simulation/types'
 
 const initialStats: SimulationStats = {
   day: 1,
@@ -12,6 +17,7 @@ const initialStats: SimulationStats = {
   carrotsRemaining: 0,
   birthsToday: 0,
   timeRemainingMs: DEFAULT_SETTINGS.dayDurationMs,
+  bernardsPerDay: [{ day: 1, bernards: 5 }],
 }
 
 function App() {
@@ -30,6 +36,7 @@ function App() {
 function SimulatorPage() {
   const [carrotsToSurvive, setCarrotsToSurvive] = useState(DEFAULT_SETTINGS.carrotsToSurvive)
   const [carrotsToReproduce, setCarrotsToReproduce] = useState(DEFAULT_SETTINGS.carrotsToReproduce)
+  const [totalCarrots, setTotalCarrots] = useState(DEFAULT_SETTINGS.totalCarrots)
   const [speed, setSpeed] = useState<SimulationSpeed>(DEFAULT_SETTINGS.speed)
   const [stats, setStats] = useState<SimulationStats>(initialStats)
 
@@ -37,10 +44,11 @@ function SimulatorPage() {
     () => ({
       carrotsToSurvive,
       carrotsToReproduce: Math.max(carrotsToReproduce, carrotsToSurvive + 1),
+      totalCarrots,
       speed,
       dayDurationMs: DEFAULT_SETTINGS.dayDurationMs,
     }),
-    [carrotsToReproduce, carrotsToSurvive, speed],
+    [carrotsToReproduce, carrotsToSurvive, speed, totalCarrots],
   )
 
   const dayProgress = Math.max(
@@ -112,6 +120,14 @@ function SimulatorPage() {
                 suffix="carrots"
                 onChange={(value) => setCarrotsToReproduce(Math.max(value, carrotsToSurvive + 1))}
               />
+              <RangeControl
+                label="Total Carrots"
+                min={10}
+                max={120}
+                value={settings.totalCarrots}
+                suffix="total"
+                onChange={setTotalCarrots}
+              />
               <div>
                 <div className="mb-2 flex items-center justify-between gap-3">
                   <label className="text-sm font-semibold text-slate-800">Speed</label>
@@ -138,7 +154,66 @@ function SimulatorPage() {
           </section>
         </aside>
       </section>
+      <StatsOverlay history={stats.bernardsPerDay} />
     </>
+  )
+}
+
+function StatsOverlay({ history }: { history: PopulationDay[] }) {
+  const [isOpen, setIsOpen] = useState(false)
+  const visibleHistory = history.slice(-14)
+  const maxBernards = Math.max(1, ...visibleHistory.map((entry) => entry.bernards))
+
+  return (
+    <section className="fixed bottom-4 right-4 z-20 w-[min(26rem,calc(100vw-2rem))]">
+      {!isOpen ? (
+        <button
+          type="button"
+          onClick={() => setIsOpen(true)}
+          className="ml-auto flex rounded-md border border-emerald-800 bg-emerald-700 px-4 py-3 text-sm font-black text-white shadow-lg transition hover:bg-emerald-800"
+        >
+          Stats
+        </button>
+      ) : (
+        <div className="rounded-md border border-slate-950/10 bg-white p-4 shadow-xl">
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <div>
+              <h2 className="text-base font-black">Bernards Per Day</h2>
+              <p className="mt-1 text-sm text-slate-600">Population history from the current run.</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsOpen(false)}
+              className="rounded-md border border-slate-300 px-3 py-2 text-sm font-bold text-slate-800 transition hover:border-emerald-700"
+            >
+              Collapse
+            </button>
+          </div>
+          <div className="flex h-56 items-end gap-2 overflow-x-auto border-b border-l border-slate-300 px-3 pb-3">
+            {visibleHistory.map((entry) => {
+              const barHeight = Math.max(8, (entry.bernards / maxBernards) * 168)
+
+              return (
+                <div
+                  key={entry.day}
+                  className="flex h-full min-w-10 flex-col items-center justify-end gap-2"
+                >
+                  <span className="font-mono text-xs font-black text-slate-900">
+                    {entry.bernards}
+                  </span>
+                  <div
+                    className="w-8 rounded-t bg-emerald-700"
+                    style={{ height: `${barHeight}px` }}
+                    aria-label={`Day ${entry.day}: ${entry.bernards} Bernards`}
+                  />
+                  <span className="font-mono text-xs text-slate-500">D{entry.day}</span>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+    </section>
   )
 }
 

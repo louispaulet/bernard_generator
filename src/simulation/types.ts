@@ -8,6 +8,7 @@ export type Vector2 = {
 export type SimulationSettings = {
   carrotsToSurvive: number
   carrotsToReproduce: number
+  totalCarrots: number
   speed: SimulationSpeed
   dayDurationMs: number
 }
@@ -45,4 +46,10 @@ export type SimulationStats = {
   carrotsRemaining: number
   birthsToday: number
   timeRemainingMs: number
+  bernardsPerDay: PopulationDay[]
+}
+
+export type PopulationDay = {
+  day: number
+  bernards: number
 }

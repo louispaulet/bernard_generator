@@ -56,3 +56,9 @@ describe('getRealDayDurationMs', () => {
     expect(getRealDayDurationMs(settings)).toBe(expected)
   })
 })
+
+describe('DEFAULT_SETTINGS', () => {
+  it('uses a fixed default carrot budget of 40 per day', () => {
+    expect(DEFAULT_SETTINGS.totalCarrots).toBe(40)
+  })
+})
