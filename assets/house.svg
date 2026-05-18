@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="House">
+  <ellipse cx="64" cy="114" rx="46" ry="8" fill="#1f2937" opacity=".18"/>
+  <path d="M24 55h80v58H24z" fill="#f8fafc" stroke="#334155" stroke-width="4"/>
+  <path d="M15 58 64 18l49 40-8 10-41-34-41 34z" fill="#b91c1c" stroke="#7f1d1d" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M52 76h24v37H52z" fill="#92400e"/>
+  <circle cx="70" cy="94" r="3" fill="#fde68a"/>
+  <path d="M34 69h16v16H34zM78 69h16v16H78z" fill="#bae6fd" stroke="#0f172a" stroke-width="3"/>
+  <path d="M42 69v16M34 77h16M86 69v16M78 77h16" stroke="#0f172a" stroke-width="2"/>
+</svg>
