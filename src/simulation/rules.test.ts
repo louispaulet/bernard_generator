@@ -39,6 +39,19 @@ describe('resolveDay', () => {
     expect(result.newborns).toMatchObject([{ id: 9, position: house, alive: true }])
     expect(result.dead).toHaveLength(0)
   })
+
+  it('allows the survival and reproduction thresholds to be the same', () => {
+    const result = resolveDay(
+      [bernard(1, 5)],
+      { ...DEFAULT_SETTINGS, carrotsToSurvive: 5, carrotsToReproduce: 5 },
+      house,
+      9,
+    )
+
+    expect(result.survivors).toHaveLength(1)
+    expect(result.newborns).toMatchObject([{ id: 9, position: house, alive: true }])
+    expect(result.dead).toHaveLength(0)
+  })
 })
 
 describe('getRealDayDurationMs', () => {

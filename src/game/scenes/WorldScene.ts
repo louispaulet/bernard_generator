@@ -4,6 +4,9 @@ import { DEFAULT_SETTINGS, resolveDay } from '../../simulation/rules'
 import {
   createCarrots,
   createInitialBernards,
+  getHomePositionForResident,
+  getHouseCountForPopulation,
+  getHousePosition,
   HOUSE_POSITION,
 } from '../../simulation/spawn'
 import type {
@@ -17,11 +20,16 @@ import type {
 
 type BernardView = {
   data: Bernard
+  homePosition: { x: number; y: number }
   sprite: Phaser.GameObjects.Image
 }
 
 type CarrotView = {
   data: Carrot
+  sprite: Phaser.GameObjects.Image
+}
+
+type HouseView = {
   sprite: Phaser.GameObjects.Image
 }
 
@@ -34,6 +42,16 @@ export const WORLD_SIZE = {
 const BERNARD_SPEED_PIXELS_PER_MS = 0.055
 const EAT_DISTANCE = 18
 const INITIAL_BERNARDS = 5
+const MAX_GRAVES = 40
+const CEMETERY = {
+  x: 604,
+  y: 374,
+  width: 300,
+  height: 196,
+  cols: 8,
+  cellWidth: 34,
+  cellHeight: 38,
+}
 
 export class WorldScene extends Phaser.Scene {
   private settings: SimulationSettings = DEFAULT_SETTINGS
@@ -41,11 +59,13 @@ export class WorldScene extends Phaser.Scene {
   private bernards = new Map<number, BernardView>()
   private carrots = new Map<number, CarrotView>()
   private graves: Phaser.GameObjects.Image[] = []
+  private houses = new Map<number, HouseView>()
   private day = 1
   private deadTotal = 0
   private birthsToday = 0
   private dayElapsedMs = 0
   private nextBernardId = INITIAL_BERNARDS + 1
+  private builtHouseCount = Math.max(1, getHouseCountForPopulation(INITIAL_BERNARDS))
   private meadow?: Phaser.GameObjects.Graphics
   private bernardsPerDay: PopulationDay[] = [{ day: 1, bernards: INITIAL_BERNARDS }]
 
@@ -71,7 +91,7 @@ export class WorldScene extends Phaser.Scene {
   create() {
     this.cameras.main.setBackgroundColor('#cfe8c3')
     this.drawWorld()
-    this.add.image(HOUSE_POSITION.x, HOUSE_POSITION.y, 'house').setScale(0.78).setDepth(2)
+    this.updateHouses(INITIAL_BERNARDS)
     this.startFirstDay()
   }
 
@@ -100,6 +120,15 @@ export class WorldScene extends Phaser.Scene {
     this.meadow.fillCircle(760, 520, 72)
     this.meadow.fillStyle(0xf0d58f, 1)
     this.meadow.fillRoundedRect(84, 304, 780, 32, 16)
+    this.meadow.fillStyle(0xb9b5aa, 1)
+    this.meadow.fillRoundedRect(CEMETERY.x, CEMETERY.y, CEMETERY.width, CEMETERY.height, 14)
+    this.meadow.lineStyle(3, 0x837f75, 1)
+    this.meadow.strokeRoundedRect(CEMETERY.x, CEMETERY.y, CEMETERY.width, CEMETERY.height, 14)
+    this.meadow.lineStyle(1, 0xa6a195, 0.75)
+    for (let row = 1; row < 4; row += 1) {
+      const y = CEMETERY.y + 24 + row * CEMETERY.cellHeight
+      this.meadow.lineBetween(CEMETERY.x + 18, y, CEMETERY.x + CEMETERY.width - 18, y)
+    }
   }
 
   private startFirstDay() {
@@ -128,20 +157,34 @@ export class WorldScene extends Phaser.Scene {
     }
     this.bernards.clear()
 
-    for (const dead of resolution.dead.slice(-24)) {
-      const grave = this.add.image(dead.position.x, dead.position.y, 'grave').setScale(0.42).setAlpha(0.72).setDepth(1)
+    for (const dead of resolution.dead) {
+      const grave = this.add
+        .image(dead.position.x, dead.position.y, 'grave')
+        .setScale(0.38)
+        .setAlpha(0.82)
+        .setDepth(1)
       this.graves.push(grave)
     }
-    while (this.graves.length > 36) {
+    while (this.graves.length > MAX_GRAVES) {
       this.graves.shift()?.destroy()
     }
+    this.layoutGraves()
 
     for (const view of this.carrots.values()) {
       view.sprite.destroy()
     }
     this.carrots.clear()
 
-    for (const bernard of [...resolution.survivors, ...resolution.newborns]) {
+    const nextPopulation = [...resolution.survivors, ...resolution.newborns].map(
+      (bernard, index) => ({
+        ...bernard,
+        position: getHomePositionForResident(index),
+      }),
+    )
+
+    this.updateHouses(nextPopulation.length)
+
+    for (const bernard of nextPopulation) {
       this.addBernard(bernard)
     }
 
@@ -151,12 +194,47 @@ export class WorldScene extends Phaser.Scene {
     this.spawnCarrots()
   }
 
+  private updateHouses(population: number) {
+    const activeHouseCount = getHouseCountForPopulation(population)
+    this.builtHouseCount = Math.max(this.builtHouseCount, activeHouseCount, 1)
+
+    for (let index = 0; index < this.builtHouseCount; index += 1) {
+      let house = this.houses.get(index)
+
+      if (!house) {
+        const position = getHousePosition(index)
+        house = {
+          sprite: this.add.image(position.x, position.y, 'house').setScale(0.78).setDepth(2),
+        }
+        this.houses.set(index, house)
+      }
+
+      if (index < activeHouseCount) {
+        house.sprite.clearTint().setAlpha(1)
+      } else {
+        house.sprite.setTint(0x7d7f78).setAlpha(0.5)
+      }
+    }
+  }
+
+  private layoutGraves() {
+    this.graves.forEach((grave, index) => {
+      const column = index % CEMETERY.cols
+      const row = Math.floor(index / CEMETERY.cols)
+      const x = CEMETERY.x + 30 + column * CEMETERY.cellWidth
+      const y = CEMETERY.y + 32 + row * CEMETERY.cellHeight
+
+      grave.setPosition(x, y)
+    })
+  }
+
   private addBernard(bernard: Bernard) {
+    const homePosition = getHomePositionForResident(this.bernards.size)
     const sprite = this.add
       .image(bernard.position.x, bernard.position.y, 'bernard')
       .setScale(0.48)
       .setDepth(4 + (bernard.id % 3))
-    this.bernards.set(bernard.id, { data: bernard, sprite })
+    this.bernards.set(bernard.id, { data: bernard, homePosition, sprite })
   }
 
   private spawnCarrots() {
@@ -168,7 +246,10 @@ export class WorldScene extends Phaser.Scene {
     const count = this.settings.totalCarrots
 
     for (const carrot of createCarrots(count, bounds)) {
-      const sprite = this.add.image(carrot.position.x, carrot.position.y, 'carrot').setScale(0.42).setDepth(3)
+      const sprite = this.add
+        .image(carrot.position.x, carrot.position.y, 'carrot')
+        .setScale(0.42)
+        .setDepth(3)
       this.carrots.set(carrot.id, { data: carrot, sprite })
     }
   }
@@ -251,8 +332,12 @@ export class WorldScene extends Phaser.Scene {
 
   private wanderNearHouse(bernardView: BernardView, deltaMs: number) {
     const offset = {
-      x: HOUSE_POSITION.x + Math.sin((this.dayElapsedMs + bernardView.data.id * 700) / 900) * 26,
-      y: HOUSE_POSITION.y + Math.cos((this.dayElapsedMs + bernardView.data.id * 400) / 1100) * 18,
+      x:
+        bernardView.homePosition.x +
+        Math.sin((this.dayElapsedMs + bernardView.data.id * 700) / 900) * 26,
+      y:
+        bernardView.homePosition.y +
+        Math.cos((this.dayElapsedMs + bernardView.data.id * 400) / 1100) * 18,
     }
     this.moveToward(bernardView, offset, deltaMs)
   }
@@ -264,7 +349,10 @@ export class WorldScene extends Phaser.Scene {
       deadBernards: this.deadTotal,
       carrotsRemaining: this.carrots.size,
       birthsToday: this.birthsToday,
-      timeRemainingMs: Math.max(0, (this.settings.dayDurationMs - this.dayElapsedMs) / this.settings.speed),
+      timeRemainingMs: Math.max(
+        0,
+        (this.settings.dayDurationMs - this.dayElapsedMs) / this.settings.speed,
+      ),
       bernardsPerDay: [...this.bernardsPerDay],
     })
   }

@@ -43,7 +43,7 @@ function SimulatorPage() {
   const settings = useMemo<SimulationSettings>(
     () => ({
       carrotsToSurvive,
-      carrotsToReproduce: Math.max(carrotsToReproduce, carrotsToSurvive + 1),
+      carrotsToReproduce,
       totalCarrots,
       speed,
       dayDurationMs: DEFAULT_SETTINGS.dayDurationMs,
@@ -107,18 +107,15 @@ function SimulatorPage() {
                 max={10}
                 value={settings.carrotsToSurvive}
                 suffix="carrots"
-                onChange={(value) => {
-                  setCarrotsToSurvive(value)
-                  setCarrotsToReproduce((current) => Math.max(current, value + 1))
-                }}
+                onChange={setCarrotsToSurvive}
               />
               <RangeControl
                 label="Reproduce"
-                min={2}
+                min={1}
                 max={15}
                 value={settings.carrotsToReproduce}
                 suffix="carrots"
-                onChange={(value) => setCarrotsToReproduce(Math.max(value, carrotsToSurvive + 1))}
+                onChange={setCarrotsToReproduce}
               />
               <RangeControl
                 label="Total Carrots"
